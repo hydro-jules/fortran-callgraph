@@ -29,7 +29,7 @@ optional arguments:
                         default to f90
   -o OUTPUT_DIR, --output_dir OUTPUT_DIR
                         path to directory where to save dot and pdf outputs of
-                        the call graphs - default to current working directory
+                        the call graphs - default to outputs folder
   -i IGNORE, --ignore IGNORE
                         name(s) of the callee(s) in the algorithm to ignore in
                         the call graph (use double underscore to separate

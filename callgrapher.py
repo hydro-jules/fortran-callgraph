@@ -322,8 +322,8 @@ if __name__ == '__main__':
                         type=str,
                         help="path to directory where to save dot and "
                              "pdf outputs of the call graphs - default "
-                             "to current working directory",
-                        default='.')
+                             "to outputs folder",
+                        default='outputs')
     parser.add_argument('-i', '--ignore',
                         type=str,
                         help="name(s) of the callee(s) in the algorithm "
