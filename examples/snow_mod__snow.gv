@@ -2,4 +2,218 @@ digraph {
 	graph [rankdir=LR]
 	node [shape=box]
 	snow_mod__snow [label="snow_mod::snow"]
+	canopysnow_mod__canopysnow [label="canopysnow_mod::canopysnow"]
+	snow_mod__snow -> canopysnow_mod__canopysnow
+	compactsnow_mod__compactsnow [label="compactsnow_mod::compactsnow"]
+	snow_mod__snow -> compactsnow_mod__compactsnow
+	layersnow_mod__layersnow [label="layersnow_mod::layersnow"]
+	snow_mod__snow -> layersnow_mod__layersnow
+	relayersnow_mod__relayersnow [label="relayersnow_mod::relayersnow"]
+	snow_mod__snow -> relayersnow_mod__relayersnow
+	snowgrain_mod__snowgrain [label="snowgrain_mod::snowgrain"]
+	snow_mod__snow -> snowgrain_mod__snowgrain
+	snowpack_mod__snowpack [label="snowpack_mod::snowpack"]
+	snow_mod__snow -> snowpack_mod__snowpack
+	snowtherm_mod__snowtherm [label="snowtherm_mod::snowtherm"]
+	snow_mod__snow -> snowtherm_mod__snowtherm
+	water_constants_mod__lf [label="water_constants_mod::lf"]
+	snow_mod__snow -> water_constants_mod__lf
+	jules_snow_mod__nsmax [label="jules_snow_mod::nsmax"]
+	snow_mod__snow -> jules_snow_mod__nsmax
+	jules_snow_mod__l_snow_infilt [label="jules_snow_mod::l_snow_infilt"]
+	snow_mod__snow -> jules_snow_mod__l_snow_infilt
+	jules_snow_mod__graupel_options [label="jules_snow_mod::graupel_options"]
+	snow_mod__snow -> jules_snow_mod__graupel_options
+	jules_snow_mod__graupel_as_snow [label="jules_snow_mod::graupel_as_snow"]
+	snow_mod__snow -> jules_snow_mod__graupel_as_snow
+	jules_snow_mod__ignore_graupel [label="jules_snow_mod::ignore_graupel"]
+	snow_mod__snow -> jules_snow_mod__ignore_graupel
+	jules_snow_mod__r0 [label="jules_snow_mod::r0"]
+	snow_mod__snow -> jules_snow_mod__r0
+	jules_snow_mod__cansnowtile [label="jules_snow_mod::cansnowtile"]
+	snow_mod__snow -> jules_snow_mod__cansnowtile
+	jules_surface_types_mod__lake [label="jules_surface_types_mod::lake"]
+	snow_mod__snow -> jules_surface_types_mod__lake
+	jules_radiation_mod__l_snow_albedo [label="jules_radiation_mod::l_snow_albedo"]
+	snow_mod__snow -> jules_radiation_mod__l_snow_albedo
+	jules_radiation_mod__l_embedded_snow [label="jules_radiation_mod::l_embedded_snow"]
+	snow_mod__snow -> jules_radiation_mod__l_embedded_snow
+	sf_diags_mod__strnewsfdiag [label="sf_diags_mod::strnewsfdiag"]
+	snow_mod__snow -> sf_diags_mod__strnewsfdiag
+	ancil_info__nsoilt [label="ancil_info::nsoilt"]
+	snow_mod__snow -> ancil_info__nsoilt
+	parkind1__jprb [label="parkind1::jprb"]
+	snow_mod__snow -> parkind1__jprb
+	parkind1__jpim [label="parkind1::jpim"]
+	snow_mod__snow -> parkind1__jpim
+	yomhook__lhook [label="yomhook::lhook"]
+	snow_mod__snow -> yomhook__lhook
+	yomhook__dr_hook [label="yomhook::dr_hook"]
+	snow_mod__snow -> yomhook__dr_hook
+	um_types__real_jlslsm [label="um_types::real_jlslsm"]
+	snow_mod__snow -> um_types__real_jlslsm
+	conversions_mod__rsec_per_hour [label="conversions_mod::rsec_per_hour"]
+	snowgrain_mod__snowgrain -> conversions_mod__rsec_per_hour
+	conversions_mod__pi [label="conversions_mod::pi"]
+	snowgrain_mod__snowgrain -> conversions_mod__pi
+	c_rmol__rmol [label="c_rmol::rmol"]
+	snowgrain_mod__snowgrain -> c_rmol__rmol
+	water_constants_mod__rho_ice [label="water_constants_mod::rho_ice"]
+	snowgrain_mod__snowgrain -> water_constants_mod__rho_ice
+	water_constants_mod__tm [label="water_constants_mod::tm"]
+	snowgrain_mod__snowgrain -> water_constants_mod__tm
+	snowgrain_mod__snowgrain -> jules_snow_mod__nsmax
+	snowgrain_mod__snowgrain -> jules_snow_mod__r0
+	jules_snow_mod__rmax [label="jules_snow_mod::rmax"]
+	snowgrain_mod__snowgrain -> jules_snow_mod__rmax
+	jules_snow_mod__snow_ggr [label="jules_snow_mod::snow_ggr"]
+	snowgrain_mod__snowgrain -> jules_snow_mod__snow_ggr
+	jules_snow_mod__i_grain_growth_opt [label="jules_snow_mod::i_grain_growth_opt"]
+	snowgrain_mod__snowgrain -> jules_snow_mod__i_grain_growth_opt
+	jules_snow_mod__ip_grain_growth_marshall89 [label="jules_snow_mod::ip_grain_growth_marshall89"]
+	snowgrain_mod__snowgrain -> jules_snow_mod__ip_grain_growth_marshall89
+	jules_snow_mod__ip_grain_growth_taillandier_et [label="jules_snow_mod::ip_grain_growth_taillandier_et"]
+	snowgrain_mod__snowgrain -> jules_snow_mod__ip_grain_growth_taillandier_et
+	snowgrain_mod__snowgrain -> parkind1__jprb
+	snowgrain_mod__snowgrain -> parkind1__jpim
+	snowgrain_mod__snowgrain -> yomhook__lhook
+	snowgrain_mod__snowgrain -> yomhook__dr_hook
+	snowgrain_mod__snowgrain -> um_types__real_jlslsm
+	relayersnow_mod__relayersnow -> layersnow_mod__layersnow
+	ereport_mod__ereport [label="ereport_mod::ereport"]
+	relayersnow_mod__relayersnow -> ereport_mod__ereport
+	water_constants_mod__hcapi [label="water_constants_mod::hcapi"]
+	relayersnow_mod__relayersnow -> water_constants_mod__hcapi
+	water_constants_mod__hcapw [label="water_constants_mod::hcapw"]
+	relayersnow_mod__relayersnow -> water_constants_mod__hcapw
+	relayersnow_mod__relayersnow -> water_constants_mod__tm
+	relayersnow_mod__relayersnow -> jules_snow_mod__nsmax
+	jules_snow_mod__rho_snow_fresh [label="jules_snow_mod::rho_snow_fresh"]
+	relayersnow_mod__relayersnow -> jules_snow_mod__rho_snow_fresh
+	relayersnow_mod__relayersnow -> jules_snow_mod__r0
+	jules_snow_mod__l_rho_snow_corr [label="jules_snow_mod::l_rho_snow_corr"]
+	relayersnow_mod__relayersnow -> jules_snow_mod__l_rho_snow_corr
+	jules_snow_mod__i_relayer_opt [label="jules_snow_mod::i_relayer_opt"]
+	relayersnow_mod__relayersnow -> jules_snow_mod__i_relayer_opt
+	jules_snow_mod__ip_relayer_linear [label="jules_snow_mod::ip_relayer_linear"]
+	relayersnow_mod__relayersnow -> jules_snow_mod__ip_relayer_linear
+	jules_snow_mod__ip_relayer_rgrain_inv [label="jules_snow_mod::ip_relayer_rgrain_inv"]
+	relayersnow_mod__relayersnow -> jules_snow_mod__ip_relayer_rgrain_inv
+	relayersnow_mod__relayersnow -> jules_radiation_mod__l_snow_albedo
+	relayersnow_mod__relayersnow -> jules_radiation_mod__l_embedded_snow
+	relayersnow_mod__relayersnow -> parkind1__jprb
+	relayersnow_mod__relayersnow -> parkind1__jpim
+	relayersnow_mod__relayersnow -> yomhook__lhook
+	relayersnow_mod__relayersnow -> yomhook__dr_hook
+	relayersnow_mod__relayersnow -> um_types__real_jlslsm
+	jules_snow_mod__snowinterceptfact [label="jules_snow_mod::snowinterceptfact"]
+	canopysnow_mod__canopysnow -> jules_snow_mod__snowinterceptfact
+	jules_snow_mod__snowunloadfact [label="jules_snow_mod::snowunloadfact"]
+	canopysnow_mod__canopysnow -> jules_snow_mod__snowunloadfact
+	canopysnow_mod__canopysnow -> parkind1__jprb
+	canopysnow_mod__canopysnow -> parkind1__jpim
+	canopysnow_mod__canopysnow -> yomhook__lhook
+	canopysnow_mod__canopysnow -> yomhook__dr_hook
+	canopysnow_mod__canopysnow -> um_types__real_jlslsm
+	layersnow_mod__layersnow -> jules_snow_mod__nsmax
+	jules_snow_mod__dzsnow [label="jules_snow_mod::dzsnow"]
+	layersnow_mod__layersnow -> jules_snow_mod__dzsnow
+	layersnow_mod__layersnow -> parkind1__jprb
+	layersnow_mod__layersnow -> parkind1__jpim
+	layersnow_mod__layersnow -> yomhook__lhook
+	layersnow_mod__layersnow -> yomhook__dr_hook
+	layersnow_mod__layersnow -> um_types__real_jlslsm
+	tridag_mod__tridag [label="tridag_mod::tridag"]
+	snowpack_mod__snowpack -> tridag_mod__tridag
+	snowpack_mod__snowpack -> water_constants_mod__hcapi
+	snowpack_mod__snowpack -> water_constants_mod__hcapw
+	snowpack_mod__snowpack -> water_constants_mod__lf
+	snowpack_mod__snowpack -> water_constants_mod__rho_ice
+	water_constants_mod__rho_water [label="water_constants_mod::rho_water"]
+	snowpack_mod__snowpack -> water_constants_mod__rho_water
+	snowpack_mod__snowpack -> water_constants_mod__tm
+	ancil_info__l_lice_point [label="ancil_info::l_lice_point"]
+	snowpack_mod__snowpack -> ancil_info__l_lice_point
+	ancil_info__l_lice_surft [label="ancil_info::l_lice_surft"]
+	snowpack_mod__snowpack -> ancil_info__l_lice_surft
+	jules_soil_mod__dzsoil [label="jules_soil_mod::dzsoil"]
+	snowpack_mod__snowpack -> jules_soil_mod__dzsoil
+	jules_soil_mod__dzsoil_elev [label="jules_soil_mod::dzsoil_elev"]
+	snowpack_mod__snowpack -> jules_soil_mod__dzsoil_elev
+	jules_soil_mod__hcondeep [label="jules_soil_mod::hcondeep"]
+	snowpack_mod__snowpack -> jules_soil_mod__hcondeep
+	jules_surface_mod__l_elev_land_ice [label="jules_surface_mod::l_elev_land_ice"]
+	snowpack_mod__snowpack -> jules_surface_mod__l_elev_land_ice
+	jules_surface_mod__l_flake_model [label="jules_surface_mod::l_flake_model"]
+	snowpack_mod__snowpack -> jules_surface_mod__l_flake_model
+	snowpack_mod__snowpack -> jules_surface_types_mod__lake
+	snowpack_mod__snowpack -> jules_snow_mod__nsmax
+	snowpack_mod__snowpack -> jules_snow_mod__l_snow_infilt
+	jules_snow_mod__i_basal_melting_opt [label="jules_snow_mod::i_basal_melting_opt"]
+	snowpack_mod__snowpack -> jules_snow_mod__i_basal_melting_opt
+	jules_snow_mod__ip_basal_melting_diag_0 [label="jules_snow_mod::ip_basal_melting_diag_0"]
+	snowpack_mod__snowpack -> jules_snow_mod__ip_basal_melting_diag_0
+	snowpack_mod__snowpack -> jules_snow_mod__rho_snow_fresh
+	jules_snow_mod__snowliqcap [label="jules_snow_mod::snowliqcap"]
+	snowpack_mod__snowpack -> jules_snow_mod__snowliqcap
+	jules_snow_mod__snow_hcon [label="jules_snow_mod::snow_hcon"]
+	snowpack_mod__snowpack -> jules_snow_mod__snow_hcon
+	jules_snow_mod__rho_firn_pore_restrict [label="jules_snow_mod::rho_firn_pore_restrict"]
+	snowpack_mod__snowpack -> jules_snow_mod__rho_firn_pore_restrict
+	jules_snow_mod__rho_firn_pore_closure [label="jules_snow_mod::rho_firn_pore_closure"]
+	snowpack_mod__snowpack -> jules_snow_mod__rho_firn_pore_closure
+	lake_mod__lake_h_ice_gb [label="lake_mod::lake_h_ice_gb"]
+	snowpack_mod__snowpack -> lake_mod__lake_h_ice_gb
+	snowpack_mod__snowpack -> sf_diags_mod__strnewsfdiag
+	snowpack_mod__snowpack -> parkind1__jprb
+	snowpack_mod__snowpack -> parkind1__jpim
+	snowpack_mod__snowpack -> yomhook__lhook
+	snowpack_mod__snowpack -> yomhook__dr_hook
+	snowpack_mod__snowpack -> um_types__real_jlslsm
+	compactsnow_mod__compactsnow -> water_constants_mod__rho_ice
+	compactsnow_mod__compactsnow -> water_constants_mod__tm
+	compactsnow_mod__compactsnow -> jules_snow_mod__nsmax
+	jules_snow_mod__l_et_metamorph [label="jules_snow_mod::l_et_metamorph"]
+	compactsnow_mod__compactsnow -> jules_snow_mod__l_et_metamorph
+	jules_snow_mod__a_snow_et [label="jules_snow_mod::a_snow_et"]
+	compactsnow_mod__compactsnow -> jules_snow_mod__a_snow_et
+	jules_snow_mod__b_snow_et [label="jules_snow_mod::b_snow_et"]
+	compactsnow_mod__compactsnow -> jules_snow_mod__b_snow_et
+	jules_snow_mod__c_snow_et [label="jules_snow_mod::c_snow_et"]
+	compactsnow_mod__compactsnow -> jules_snow_mod__c_snow_et
+	jules_snow_mod__rho_snow_et_crit [label="jules_snow_mod::rho_snow_et_crit"]
+	compactsnow_mod__compactsnow -> jules_snow_mod__rho_snow_et_crit
+	planet_constants_mod__g [label="planet_constants_mod::g"]
+	compactsnow_mod__compactsnow -> planet_constants_mod__g
+	compactsnow_mod__compactsnow -> parkind1__jprb
+	compactsnow_mod__compactsnow -> parkind1__jpim
+	compactsnow_mod__compactsnow -> yomhook__lhook
+	compactsnow_mod__compactsnow -> yomhook__dr_hook
+	compactsnow_mod__compactsnow -> um_types__real_jlslsm
+	snowtherm_mod__snowtherm -> jules_snow_mod__nsmax
+	jules_snow_mod__ip_snow_cond_yen81 [label="jules_snow_mod::ip_snow_cond_yen81"]
+	snowtherm_mod__snowtherm -> jules_snow_mod__ip_snow_cond_yen81
+	jules_snow_mod__ip_snow_cond_calonne11 [label="jules_snow_mod::ip_snow_cond_calonne11"]
+	snowtherm_mod__snowtherm -> jules_snow_mod__ip_snow_cond_calonne11
+	jules_snow_mod__i_snow_cond_parm [label="jules_snow_mod::i_snow_cond_parm"]
+	snowtherm_mod__snowtherm -> jules_snow_mod__i_snow_cond_parm
+	snowtherm_mod__snowtherm -> water_constants_mod__hcapi
+	snowtherm_mod__snowtherm -> water_constants_mod__hcapw
+	snowtherm_mod__snowtherm -> water_constants_mod__rho_water
+	snowtherm_mod__snowtherm -> parkind1__jprb
+	snowtherm_mod__snowtherm -> parkind1__jpim
+	snowtherm_mod__snowtherm -> yomhook__lhook
+	snowtherm_mod__snowtherm -> yomhook__dr_hook
+	snowtherm_mod__snowtherm -> um_types__real_jlslsm
+	tridag_mod__tridag -> yomhook__lhook
+	tridag_mod__tridag -> yomhook__dr_hook
+	tridag_mod__tridag -> parkind1__jprb
+	tridag_mod__tridag -> parkind1__jpim
+	tridag_mod__tridag -> um_types__real_jlslsm
+	logging_mod__log_info [label="logging_mod::log_info"]
+	ereport_mod__ereport -> logging_mod__log_info
+	logging_mod__log_warn [label="logging_mod::log_warn"]
+	ereport_mod__ereport -> logging_mod__log_warn
+	logging_mod__log_fatal [label="logging_mod::log_fatal"]
+	ereport_mod__ereport -> logging_mod__log_fatal
 }
