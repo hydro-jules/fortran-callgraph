@@ -1,0 +1,5 @@
+digraph {
+	graph [rankdir=LR]
+	node [shape=box]
+	snow_mod__snow [label="snow_mod::snow"]
+}
