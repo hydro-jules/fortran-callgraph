@@ -31,7 +31,7 @@ def parse_fortran_files(fortran_files, sep_):
         with open(fortran_file, 'r') as f:
             for i, line in enumerate(f):
                 # ignore commented lines
-                if line.strip().startswith('!'):
+                if line.strip().startswith('!') or line.strip().startswith('#'):
                     continue
 
                 # unwrap continued lines
@@ -59,7 +59,7 @@ def parse_fortran_files(fortran_files, sep_):
                 lineno = i + 1
 
                 # ignore commented lines
-                if line.strip().startswith('!'):
+                if line.strip().startswith('!') or line.strip().startswith('#'):
                     continue
 
                 # unwrap continued lines
