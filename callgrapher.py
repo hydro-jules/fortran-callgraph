@@ -326,6 +326,7 @@ if __name__ == '__main__':
                         default='outputs')
     parser.add_argument('-i', '--ignore',
                         type=str,
+                        nargs='+',
                         help="name(s) of the callee(s) in the algorithm "
                              "to ignore in the call graph (use double "
                              "underscore to separate module and "
