@@ -237,7 +237,8 @@ def generate_dot_and_pdf(root_caller, caller_callees, sep_, out_dir,
         },
         edge_attr={},
         node_attr={
-            'shape': 'box'
+            'shape': 'box',
+            'fontname': 'Helvetica'
         }
     )
 
