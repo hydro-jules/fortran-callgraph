@@ -18,8 +18,6 @@ def parse_fortran_files(fortran_files, sep_):
         renaming = {}
         # store name of modules from use to append in call
         use_to_call = {}
-        # if else condition for UM vs. standalone
-        um_jules = False
         # to know if we are in an interface block
         in_interface = False
         # to unwrap wrapped lines using '&'
