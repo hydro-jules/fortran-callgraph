@@ -10,6 +10,8 @@ def parse_fortran_files(fortran_files, sep_):
     # parse files
     locations = {}
     caller_callees = {}
+    memberships = {}
+    kinds = {}
 
     for fortran_file in fortran_files:
         # internal subroutines and functions
@@ -91,6 +93,11 @@ def parse_fortran_files(fortran_files, sep_):
                     in_interface = 'assignment'
                 elif re.search(r"(INTERFACE +)([0-9a-z_]+)", line):
                     name = re.search(r"(INTERFACE +)([0-9a-z_]+)", line).group(2)
+                    if breadcrumbs:
+                        if breadcrumbs[-1] not in memberships:
+                            memberships[breadcrumbs[-1]] = []
+                        memberships[breadcrumbs[-1]].append(name)
+                    kinds[sep_.join(breadcrumbs + [name])] = 'GENERIC_INTERFACE'
                     locations[sep_.join(breadcrumbs + [name])] = fortran_file
                     # ignore interface since also defined elsewhere
                     in_interface = 'generic'
@@ -112,6 +119,7 @@ def parse_fortran_files(fortran_files, sep_):
                 elif re.search(r"(PROGRAM +)([0-9a-z_]+)", line):
                     name = re.search(r"(PROGRAM +)([0-9a-z_]+)", line).group(2)
                     breadcrumbs.append(name)
+                    kinds[sep_.join(breadcrumbs)] = 'PROGRAM'
                     locations[sep_.join(breadcrumbs)] = fortran_file
 
                 # find modules
@@ -128,6 +136,7 @@ def parse_fortran_files(fortran_files, sep_):
                 elif re.search(r"(MODULE +)([0-9a-z_]+)", line):
                     name = re.search(r"(MODULE +)([0-9a-z_]+)", line).group(2)
                     breadcrumbs.append(name)
+                    kinds[sep_.join(breadcrumbs)] = 'MODULE'
                     locations[sep_.join(breadcrumbs)] = fortran_file
 
                 # find types
@@ -141,7 +150,12 @@ def parse_fortran_files(fortran_files, sep_):
 
                 elif re.search(r"(TYPE +)([0-9a-z_]+)", line):
                     name = re.search(r"(TYPE +)([0-9a-z_]+)", line).group(2)
+                    if breadcrumbs:
+                        if breadcrumbs[-1] not in memberships:
+                            memberships[breadcrumbs[-1]] = []
+                        memberships[breadcrumbs[-1]].append(name)
                     breadcrumbs.append(name)
+                    kinds[sep_.join(breadcrumbs)] = 'TYPE'
                     locations[sep_.join(breadcrumbs)] = fortran_file
 
                 # find subroutines
@@ -154,7 +168,12 @@ def parse_fortran_files(fortran_files, sep_):
                                            "{} in {} #L{}".format(name, fortran_file, lineno))
                 elif re.search(r"(SUBROUTINE +)([0-9a-z_]+)", line):
                     name = re.search(r"(SUBROUTINE +)([0-9a-z_]+)", line).group(2)
+                    if breadcrumbs:
+                        if breadcrumbs[-1] not in memberships:
+                            memberships[breadcrumbs[-1]] = []
+                        memberships[breadcrumbs[-1]].append(name)
                     breadcrumbs.append(name)
+                    kinds[sep_.join(breadcrumbs)] = 'SUBROUTINE'
                     locations[sep_.join(breadcrumbs)] = fortran_file
 
                 # find functions
@@ -167,7 +186,12 @@ def parse_fortran_files(fortran_files, sep_):
                                            "{} in {} #L{}".format(name, fortran_file, lineno))
                 elif re.search(r"(FUNCTION +)([0-9a-z_]+)", line):
                     name = re.search(r"(FUNCTION +)([0-9a-z_]+)", line).group(2)
+                    if breadcrumbs:
+                        if breadcrumbs[-1] not in memberships:
+                            memberships[breadcrumbs[-1]] = []
+                        memberships[breadcrumbs[-1]].append(name)
                     breadcrumbs.append(name)
+                    kinds[sep_.join(breadcrumbs)] = 'FUNCTION'
                     locations[sep_.join(breadcrumbs)] = fortran_file
 
                 # find use statements
@@ -222,23 +246,61 @@ def parse_fortran_files(fortran_files, sep_):
                         sep_.join([root, name]) if root else name
                     )
 
-    return caller_callees, locations
+    return caller_callees, memberships, kinds, locations
 
 
-def generate_dot_and_pdf(root_caller, caller_callees, sep_, out_dir,
-                         ignore=None):
+def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
+                         sep_, out_dir, ignore=None):
     # create graph
     dot = gv.Digraph(
         engine='dot',
         graph_attr={
             'rankdir': 'LR'
         },
-        edge_attr={},
+        edge_attr={
+            'dir': 'both',
+            'arrowhead': 'normal',
+            'arrowtail': 'none'
+        },
         node_attr={
             'shape': 'box',
             'fontname': 'Helvetica'
         }
     )
+
+    # formatting
+    formats = {
+        'PROGRAM': {
+            'shape': 'parallelogram',
+            'style': 'filled',
+            'fillcolor': 'grey'
+        },
+        'MODULE': {
+            'style': 'filled',
+            'fillcolor': 'grey'
+        },
+        'SUBROUTINE': {
+            'style': 'filled',
+            'fillcolor': 'transparent'
+        },
+        'FUNCTION': {
+            'style': 'filled',
+            'fillcolor': 'transparent'
+        },
+        # generic interface assimilated as subroutine/function
+        'GENERIC_INTERFACE': {
+            'style': 'filled',
+            'fillcolor': 'transparent'
+        },
+        'TYPE': {
+            'style': 'rounded',
+            'fillcolor': 'transparent'
+        },
+        'OTHER': {
+            'style': 'diagonals',
+            'fillcolor': 'transparent'
+        }
+    }
 
     # get initial caller
     callers = [root_caller]
@@ -252,8 +314,35 @@ def generate_dot_and_pdf(root_caller, caller_callees, sep_, out_dir,
         for caller in callers:
             # if caller not already a node, make it one
             if caller not in nodes:
-                dot.node(name=caller, label=caller.replace(sep_, '::'))
+                # add node for caller
+                dot.node(name=caller, label=caller.split(sep_)[-1],
+                         **formats[kinds.get(caller, 'OTHER')])
                 nodes.append(caller)
+
+                # split up parent and child in caller if possible
+                if sep_ in caller:
+                    parent, child = caller.split(sep_)
+                    if parent not in nodes:
+                        # add node for parent
+                        dot.node(parent, **formats[kinds.get(parent, 'OTHER')])
+                        nodes.append(parent)
+                        # add parent as potential next caller
+                        next_callers.append(parent)
+                        # add other children of parent as potential next caller
+                        if parent in memberships:
+                            for m in memberships[parent]:
+                                other_child = sep_.join([parent, m])
+                                # check whether to ignore callee
+                                if not (ignore and (other_child in ignore)):
+                                    # add if callee is itself a caller
+                                    if other_child in caller_callees:
+                                        next_callers.append(other_child)
+                    if (parent, child) not in edges:
+                        # add edge for parent-child relationship
+                        dot.edge(parent, caller, arrowhead='none',
+                                 arrowtail='diamond')
+                        edges.append((parent, child))
+
             # collect callees of current caller (if any)
             callees = caller_callees.get(caller, [])
             for callee in callees:
@@ -261,8 +350,34 @@ def generate_dot_and_pdf(root_caller, caller_callees, sep_, out_dir,
                     continue
                 # if callee not already a node, make it one
                 if callee not in nodes:
-                    dot.node(name=callee, label=callee.replace(sep_, '::'))
+                    # add node for callee
+                    dot.node(name=callee, label=callee.split(sep_)[-1],
+                             **formats[kinds.get(callee, 'OTHER')])
                     nodes.append(callee)
+
+                    # split up parent and child in callee if possible
+                    if sep_ in callee:
+                        parent, child = callee.split(sep_)
+                        if parent not in nodes:
+                            # add node for parent
+                            dot.node(parent, **formats[kinds.get(parent, 'OTHER')])
+                            nodes.append(parent)
+                            # add parent as potential next caller
+                            next_callers.append(parent)
+                            # add other children of parent as potential next caller
+                            if parent in memberships:
+                                for m in memberships[parent]:
+                                    other_child = sep_.join([parent, m])
+                                    # check whether to ignore callee
+                                    if not (ignore and (other_child in ignore)):
+                                        # add if callee is itself a caller
+                                        if other_child in caller_callees:
+                                            next_callers.append(other_child)
+                        if (parent, child) not in edges:
+                            # add edge for parent-child relationship
+                            dot.edge(parent, callee, arrowhead='none', arrowtail='diamond')
+                            edges.append((parent, child))
+
                 # add edge between caller and callee
                 if (caller, callee) not in edges:
                     dot.edge(caller, callee)
@@ -346,13 +461,17 @@ if __name__ == '__main__':
                           recursive=True)
 
     # parse all source code
-    _caller_callees, _locations = parse_fortran_files(_fortran_files, _sep)
+    _caller_callees, _memberships, _kinds, _locations = parse_fortran_files(
+        _fortran_files, _sep
+    )
 
     # for each root caller
     for _root_caller in root_callers:
         # generate a call graph
-        _nodes = generate_dot_and_pdf(_root_caller, _caller_callees, _sep,
-                                      output_dir, _ignore)
+        _nodes = generate_dot_and_pdf(
+            _root_caller, _caller_callees, _memberships, _kinds,
+            _sep, output_dir, _ignore
+        )
 
         # generate a location helper
         generate_loc(_root_caller, _locations, _nodes, output_dir)
