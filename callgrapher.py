@@ -205,12 +205,12 @@ def parse_fortran_files(fortran_files, sep_):
                             if '=>' in name:
                                 name1, name2 = name.split('=>')
                                 caller_callees[sep_.join(breadcrumbs)].append(
-                                    sep_.join([match.group(2), name1.strip()])
+                                    sep_.join([match.group(2), name2.strip()])
                                 )
                                 # store renaming
-                                renaming[name2.strip()] = name1.strip()
+                                renaming[name1.strip()] = name2.strip()
                                 # store module name
-                                use_to_call[name2.strip()] = match.group(2)
+                                use_to_call[name1.strip()] = match.group(2)
                             else:
                                 caller_callees[sep_.join(breadcrumbs)].append(
                                     sep_.join([match.group(2), name])
