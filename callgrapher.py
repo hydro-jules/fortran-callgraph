@@ -245,6 +245,10 @@ def parse_fortran_files(fortran_files, sep_):
                     caller_callees[sep_.join(breadcrumbs)].append(
                         sep_.join([root, name]) if root else name
                     )
+                    # add call to subroutine kind (even if it may
+                    # already be in there, this makes sure calls to
+                    # external modules are picked up)
+                    kinds[sep_.join([root, name]) if root else name] = 'SUBROUTINE'
 
     return caller_callees, memberships, kinds, locations
 
