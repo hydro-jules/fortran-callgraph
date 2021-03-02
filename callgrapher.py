@@ -254,26 +254,9 @@ def parse_fortran_files(fortran_files, sep_):
 
 
 def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
-                         sep_, out_dir, ignore=None):
-    # create graph
-    dot = gv.Digraph(
-        engine='dot',
-        graph_attr={
-            'rankdir': 'LR'
-        },
-        edge_attr={
-            'dir': 'both',
-            'arrowhead': 'normal',
-            'arrowtail': 'none'
-        },
-        node_attr={
-            'shape': 'box',
-            'fontname': 'Helvetica'
-        }
-    )
-
+                         sep_, out_dir, ignore=None, clustering=False):
     # formatting
-    formats = {
+    node_attrs = {
         'PROGRAM': {
             'shape': 'parallelogram',
             'style': 'filled',
@@ -306,10 +289,33 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
         }
     }
 
+    graph_attrs = {
+        'engine': 'dot',
+        'graph_attr': {
+            'rankdir': 'LR',
+            'style': 'dotted'
+        },
+        # default edge
+        'edge_attr': {
+            'dir': 'both',
+            'arrowhead': 'normal',
+            'arrowtail': 'none'
+        },
+        # default node
+        'node_attr': {
+            'shape': 'box',
+            'fontname': 'Helvetica'
+        }
+    }
+
+    # create graph
+    base = gv.Digraph(name='base', **graph_attrs)
+
     # get initial caller
     callers = [root_caller]
 
     # start graph construction
+    graphs = {}
     nodes = []
     edges = []
 
@@ -318,17 +324,21 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
         for caller in callers:
             # if caller not already a node, make it one
             if caller not in nodes:
-                # add node for caller
-                dot.node(name=caller, label=caller.split(sep_)[-1],
-                         **formats[kinds.get(caller, 'VARIABLE')])
-                nodes.append(caller)
-
                 # split up parent and child in caller if possible
                 if sep_ in caller:
                     parent, child = caller.split(sep_)
                     if parent not in nodes:
+                        # create cluster graph if requested
+                        if clustering:
+                            graph = gv.Digraph(
+                                name='_'.join(['cluster', parent]),
+                                **graph_attrs
+                            )
+                        else:
+                            graph = base
+                        graphs[parent] = graph
                         # add node for parent
-                        dot.node(parent, **formats[kinds.get(parent, 'MODULE')])
+                        graph.node(parent, **node_attrs[kinds.get(parent, 'MODULE')])
                         nodes.append(parent)
                         # add parent as potential next caller
                         next_callers.append(parent)
@@ -343,9 +353,19 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                                         next_callers.append(other_child)
                     if (parent, child) not in edges:
                         # add edge for parent-child relationship
-                        dot.edge(parent, caller, arrowhead='none',
-                                 arrowtail='diamond')
+                        base.edge(parent, caller, arrowhead='none',
+                                     arrowtail='diamond')
                         edges.append((parent, child))
+                else:
+                    # assign caller to base graph
+                    graphs[caller] = base
+
+                # add node for caller
+                graphs[caller.split(sep_)[0]].node(
+                    name=caller, label=caller.split(sep_)[-1],
+                    **node_attrs[kinds.get(caller, 'VARIABLE')]
+                )
+                nodes.append(caller)
 
             # collect callees of current caller (if any)
             callees = caller_callees.get(caller, [])
@@ -354,17 +374,21 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                     continue
                 # if callee not already a node, make it one
                 if callee not in nodes:
-                    # add node for callee
-                    dot.node(name=callee, label=callee.split(sep_)[-1],
-                             **formats[kinds.get(callee, 'VARIABLE')])
-                    nodes.append(callee)
-
                     # split up parent and child in callee if possible
                     if sep_ in callee:
                         parent, child = callee.split(sep_)
                         if parent not in nodes:
+                            # create cluster graph if requested
+                            if clustering:
+                                graph = gv.Digraph(
+                                    name='_'.join(['cluster', parent]),
+                                    **graph_attrs
+                                )
+                            else:
+                                graph = base
+                            graphs[parent] = graph
                             # add node for parent
-                            dot.node(parent, **formats[kinds.get(parent, 'MODULE')])
+                            graph.node(parent, **node_attrs[kinds.get(parent, 'MODULE')])
                             nodes.append(parent)
                             # add parent as potential next caller
                             next_callers.append(parent)
@@ -379,12 +403,23 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                                             next_callers.append(other_child)
                         if (parent, child) not in edges:
                             # add edge for parent-child relationship
-                            dot.edge(parent, callee, arrowhead='none', arrowtail='diamond')
+                            base.edge(parent, callee, arrowhead='none',
+                                      arrowtail='diamond')
                             edges.append((parent, child))
+                    else:
+                        # assign callee to base graph
+                        graphs[callee] = base
+
+                    # add node for callee
+                    graphs[callee.split(sep_)[0]].node(
+                        name=callee, label=callee.split(sep_)[-1],
+                        **node_attrs[kinds.get(callee, 'VARIABLE')]
+                    )
+                    nodes.append(callee)
 
                 # add edge between caller and callee
                 if (caller, callee) not in edges:
-                    dot.edge(caller, callee)
+                    base.edge(caller, callee)
                     edges.append((caller, callee))
                 # store callee as potential next caller
                 next_callers.append(callee)
@@ -392,8 +427,13 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
         next_callers = list(set(next_callers))
         callers = next_callers
 
+    # if clustering requested, append clusters as sub-graphs of base graph
+    if clustering:
+        for parent, graph in graphs.items():
+            base.subgraph(graph)
+
     # store graph in dot and pdf
-    dot.render(
+    base.render(
         sep.join([out_dir, '{}.gv'.format(root_caller)]),
         format='pdf',
         view=True
@@ -449,6 +489,12 @@ if __name__ == '__main__':
                              "to ignore in the call graph (use double "
                              "underscore to separate module and "
                              "subroutine/function)")
+    parser.add_argument('-c', '--cluster',
+                        dest='cluster',
+                        action='store_true',
+                        help="visually gather entities into their "
+                             "containing modules (if any)")
+    parser.set_defaults(cluster=False)
 
     # collect parameters
     args = parser.parse_args()
@@ -458,6 +504,7 @@ if __name__ == '__main__':
     output_dir = args.output_dir
     extension = args.extension
     _ignore = args.ignore
+    _clustering = args.cluster
 
     # gather all Fortran files found in source directory and its sub-directories
     _sep = '__'
@@ -474,7 +521,7 @@ if __name__ == '__main__':
         # generate a call graph
         _nodes = generate_dot_and_pdf(
             _root_caller, _caller_callees, _memberships, _kinds,
-            _sep, output_dir, _ignore
+            _sep, output_dir, _ignore, _clustering
         )
 
         # generate a location helper
