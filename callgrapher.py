@@ -300,7 +300,7 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
             'style': 'rounded',
             'fillcolor': 'transparent'
         },
-        'OTHER': {
+        'VARIABLE': {
             'style': 'diagonals',
             'fillcolor': 'transparent'
         }
@@ -320,7 +320,7 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
             if caller not in nodes:
                 # add node for caller
                 dot.node(name=caller, label=caller.split(sep_)[-1],
-                         **formats[kinds.get(caller, 'OTHER')])
+                         **formats[kinds.get(caller, 'VARIABLE')])
                 nodes.append(caller)
 
                 # split up parent and child in caller if possible
@@ -328,7 +328,7 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                     parent, child = caller.split(sep_)
                     if parent not in nodes:
                         # add node for parent
-                        dot.node(parent, **formats[kinds.get(parent, 'OTHER')])
+                        dot.node(parent, **formats[kinds.get(parent, 'MODULE')])
                         nodes.append(parent)
                         # add parent as potential next caller
                         next_callers.append(parent)
@@ -356,7 +356,7 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                 if callee not in nodes:
                     # add node for callee
                     dot.node(name=callee, label=callee.split(sep_)[-1],
-                             **formats[kinds.get(callee, 'OTHER')])
+                             **formats[kinds.get(callee, 'VARIABLE')])
                     nodes.append(callee)
 
                     # split up parent and child in callee if possible
@@ -364,7 +364,7 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                         parent, child = callee.split(sep_)
                         if parent not in nodes:
                             # add node for parent
-                            dot.node(parent, **formats[kinds.get(parent, 'OTHER')])
+                            dot.node(parent, **formats[kinds.get(parent, 'MODULE')])
                             nodes.append(parent)
                             # add parent as potential next caller
                             next_callers.append(parent)
