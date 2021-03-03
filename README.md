@@ -8,7 +8,7 @@ python callgrapher.py --help
 
 ```text
 usage: callgrapher.py [-h] [-s SOURCE_DIR] [-e EXTENSION] [-o OUTPUT_DIR]
-                      [-i IGNORE]
+                      [-i IGNORE [IGNORE ...]] [-c]
                       root_callers [root_callers ...]
 
 generate call graphs from preprocessed Fortran source code
@@ -30,10 +30,12 @@ optional arguments:
   -o OUTPUT_DIR, --output_dir OUTPUT_DIR
                         path to directory where to save dot and pdf outputs of
                         the call graphs - default to outputs folder
-  -i IGNORE, --ignore IGNORE
+  -i IGNORE [IGNORE ...], --ignore IGNORE [IGNORE ...]
                         name(s) of the callee(s) in the algorithm to ignore in
                         the call graph (use double underscore to separate
                         module and subroutine/function)
+  -c, --cluster         visually gather entities into their containing modules
+                        (if any)
 ```
 
 ### Example
