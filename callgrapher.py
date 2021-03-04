@@ -354,7 +354,7 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                     if (parent, child) not in edges:
                         # add edge for parent-child relationship
                         base.edge(parent, caller, arrowhead='none',
-                                     arrowtail='diamond')
+                                  arrowtail='diamond')
                         edges.append((parent, child))
                 else:
                     # assign caller to base graph
