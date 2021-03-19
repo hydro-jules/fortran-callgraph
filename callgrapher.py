@@ -195,8 +195,9 @@ def parse_fortran_files(fortran_files, sep_):
                     locations[sep_.join(breadcrumbs)] = fortran_file
 
                 # find use statements
-                elif re.search(r"(USE +)([0-9a-z_]+)( *, *ONLY *:)([0-9a-z_,=> ]+)", line):
-                    match = re.search(r"(USE +)([0-9a-z_]+)( *, *ONLY *: *)([0-9a-z_,=> ]+)", line)
+                elif re.search(
+                        r"(USE +)([0-9a-z_]+)( *, *ONLY *:)([0-9a-z_,+\-*/=><() ]+)", line):
+                    match = re.search(r"(USE +)([0-9a-z_]+)( *, *ONLY *:)([0-9a-z_,+\-*/=><() ]+)", line)
                     for name in match.group(4).split(','):
                         name = name.strip()
                         if name:
