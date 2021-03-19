@@ -255,7 +255,8 @@ def parse_fortran_files(fortran_files, sep_):
 
 
 def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
-                         sep_, out_dir, ignore=None, clustering=False):
+                         sep_, out_dir, ignore=None, clustering=False,
+                         without_variables=False):
     # formatting
     node_attrs = {
         'PROGRAM': {
@@ -325,6 +326,11 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
         for caller in callers:
             # if caller not already a node, make it one
             if caller not in nodes:
+                if caller not in kinds:
+                    # i.e. it is a variable
+                    if without_variables:
+                        continue
+
                 # split up parent and child in caller if possible
                 if sep_ in caller:
                     parent, child = caller.split(sep_)
@@ -375,6 +381,11 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                     continue
                 # if callee not already a node, make it one
                 if callee not in nodes:
+                    if callee not in kinds:
+                        # i.e. it is a variable
+                        if without_variables:
+                            continue
+
                     # split up parent and child in callee if possible
                     if sep_ in callee:
                         parent, child = callee.split(sep_)
@@ -495,7 +506,11 @@ if __name__ == '__main__':
                         action='store_true',
                         help="visually gather entities into their "
                              "containing modules (if any)")
-    parser.set_defaults(cluster=False)
+    parser.add_argument('-v', '--without_variables',
+                        dest='without_variables',
+                        action='store_true',
+                        help="option to not display the variables")
+    parser.set_defaults(cluster=False, without_variables=False)
 
     # collect parameters
     args = parser.parse_args()
@@ -506,6 +521,7 @@ if __name__ == '__main__':
     extension = args.extension
     _ignore = args.ignore
     _clustering = args.cluster
+    _without_variables = args.without_variables
 
     # gather all Fortran files found in source directory and its sub-directories
     _sep = '__'
@@ -522,7 +538,7 @@ if __name__ == '__main__':
         # generate a call graph
         _nodes = generate_dot_and_pdf(
             _root_caller, _caller_callees, _memberships, _kinds,
-            _sep, output_dir, _ignore, _clustering
+            _sep, output_dir, _ignore, _clustering, _without_variables
         )
 
         # generate a location helper
