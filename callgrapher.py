@@ -47,11 +47,11 @@ def parse_fortran_files(fortran_files, sep_):
                     line = line.split('!')[0]
 
                 # find subroutines
-                if re.search(r"(SUBROUTINE +)([0-9a-z_]+)", line):
-                    internal.append(re.search(r"(SUBROUTINE +)([0-9a-z_]+)", line).group(2))
+                if re.search(r"(SUBROUTINE +)([0-9A-Za-z_]+)", line):
+                    internal.append(re.search(r"(SUBROUTINE +)([0-9A-Za-z_]+)", line).group(2).lower())
                 # find functions
-                elif re.search(r"(FUNCTION +)([0-9a-z_]+)", line):
-                    internal.append(re.search(r"(FUNCTION +)([0-9a-z_]+)", line).group(2))
+                elif re.search(r"(FUNCTION +)([0-9A-Za-z_]+)", line):
+                    internal.append(re.search(r"(FUNCTION +)([0-9A-Za-z_]+)", line).group(2).lower())
 
         # second pass to properly parse the file
         with open(fortran_file, 'r') as f:
@@ -75,8 +75,8 @@ def parse_fortran_files(fortran_files, sep_):
                     line = line.split('!')[0]
 
                 # find interfaces
-                if re.search(r"(END +INTERFACE *)([0-9a-z_]*)", line):
-                    name = re.search(r"(END +INTERFACE *)([0-9a-z_]*)", line).group(2)
+                if re.search(r"(END +INTERFACE *)([0-9A-Za-z_]*)", line):
+                    name = re.search(r"(END +INTERFACE *)([0-9A-Za-z_]*)", line).group(2).lower()
                     if not in_interface:
                         raise RuntimeError("'END INTERFACE' found without 'INTERFACE': "
                                            "{} in {} #L{}".format(name, fortran_file, lineno))
@@ -91,8 +91,8 @@ def parse_fortran_files(fortran_files, sep_):
                 elif re.search(r"(INTERFACE +)(assignment *\()", line):
                     # ignore interface since overloaded assignment on type
                     in_interface = 'assignment'
-                elif re.search(r"(INTERFACE +)([0-9a-z_]+)", line):
-                    name = re.search(r"(INTERFACE +)([0-9a-z_]+)", line).group(2)
+                elif re.search(r"(INTERFACE +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(INTERFACE +)([0-9A-Za-z_]+)", line).group(2).lower()
                     if breadcrumbs:
                         if breadcrumbs[-1] not in memberships:
                             memberships[breadcrumbs[-1]] = []
@@ -106,8 +106,8 @@ def parse_fortran_files(fortran_files, sep_):
                     in_interface = 'explicit'
 
                 # find programs
-                if re.search(r"(END +PROGRAM +)([0-9a-z_]+)", line):
-                    name = re.search(r"(END +PROGRAM +)([0-9a-z_]+)", line).group(2)
+                if re.search(r"(END +PROGRAM +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(END +PROGRAM +)([0-9A-Za-z_]+)", line).group(2).lower()
                     if breadcrumbs and (name == breadcrumbs[-1]):
                         breadcrumbs.pop(-1)
                         if breadcrumbs:
@@ -116,15 +116,15 @@ def parse_fortran_files(fortran_files, sep_):
                     else:
                         raise RuntimeError("'END PROGRAM' found without 'program': "
                                            "{} in {} #L{}".format(name, fortran_file, lineno))
-                elif re.search(r"(PROGRAM +)([0-9a-z_]+)", line):
-                    name = re.search(r"(PROGRAM +)([0-9a-z_]+)", line).group(2)
+                elif re.search(r"(PROGRAM +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(PROGRAM +)([0-9A-Za-z_]+)", line).group(2).lower()
                     breadcrumbs.append(name)
                     kinds[sep_.join(breadcrumbs)] = 'PROGRAM'
                     locations[sep_.join(breadcrumbs)] = fortran_file
 
                 # find modules
-                elif re.search(r"(END +MODULE +)([0-9a-z_]+)", line):
-                    name = re.search(r"(END +MODULE +)([0-9a-z_]+)", line).group(2)
+                elif re.search(r"(END +MODULE +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(END +MODULE +)([0-9A-Za-z_]+)", line).group(2).lower()
                     if breadcrumbs and (name == breadcrumbs[-1]):
                         breadcrumbs.pop(-1)
                         if breadcrumbs:
@@ -133,23 +133,23 @@ def parse_fortran_files(fortran_files, sep_):
                     else:
                         raise RuntimeError("'END MODULE' found without 'MODULE': "
                                            "{} in {} #L{}".format(name, fortran_file, lineno))
-                elif re.search(r"(MODULE +)([0-9a-z_]+)", line):
-                    name = re.search(r"(MODULE +)([0-9a-z_]+)", line).group(2)
+                elif re.search(r"(MODULE +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(MODULE +)([0-9A-Za-z_]+)", line).group(2).lower()
                     breadcrumbs.append(name)
                     kinds[sep_.join(breadcrumbs)] = 'MODULE'
                     locations[sep_.join(breadcrumbs)] = fortran_file
 
                 # find types
-                elif re.search(r"(END +TYPE +)([0-9a-z_]*)", line):
-                    name = re.search(r"(END +TYPE *)([0-9a-z_]*)", line).group(2)
+                elif re.search(r"(END +TYPE +)([0-9A-Za-z_]*)", line):
+                    name = re.search(r"(END +TYPE *)([0-9A-Za-z_]*)", line).group(2).lower()
                     if breadcrumbs and (name == breadcrumbs[-1]):
                         breadcrumbs.pop(-1)
                     else:
                         raise RuntimeError("'END TYPE' found without 'TYPE': "
                                            "{} in {} #L{}".format(name, fortran_file, lineno))
 
-                elif re.search(r"(TYPE +)([0-9a-z_]+)", line):
-                    name = re.search(r"(TYPE +)([0-9a-z_]+)", line).group(2)
+                elif re.search(r"(TYPE +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(TYPE +)([0-9A-Za-z_]+)", line).group(2).lower()
                     if breadcrumbs:
                         if breadcrumbs[-1] not in memberships:
                             memberships[breadcrumbs[-1]] = []
@@ -159,15 +159,15 @@ def parse_fortran_files(fortran_files, sep_):
                     locations[sep_.join(breadcrumbs)] = fortran_file
 
                 # find subroutines
-                elif re.search(r"(END +SUBROUTINE +)([0-9a-z_]+)", line):
-                    name = re.search(r"(END +SUBROUTINE +)([0-9a-z_]+)", line).group(2)
+                elif re.search(r"(END +SUBROUTINE +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(END +SUBROUTINE +)([0-9A-Za-z_]+)", line).group(2).lower()
                     if breadcrumbs and (name == breadcrumbs[-1]):
                         breadcrumbs.pop(-1)
                     else:
                         raise RuntimeError("'END SUBROUTINE' found without 'SUBROUTINE': "
                                            "{} in {} #L{}".format(name, fortran_file, lineno))
-                elif re.search(r"(SUBROUTINE +)([0-9a-z_]+)", line):
-                    name = re.search(r"(SUBROUTINE +)([0-9a-z_]+)", line).group(2)
+                elif re.search(r"(SUBROUTINE +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(SUBROUTINE +)([0-9A-Za-z_]+)", line).group(2).lower()
                     if breadcrumbs:
                         if breadcrumbs[-1] not in memberships:
                             memberships[breadcrumbs[-1]] = []
@@ -177,15 +177,15 @@ def parse_fortran_files(fortran_files, sep_):
                     locations[sep_.join(breadcrumbs)] = fortran_file
 
                 # find functions
-                elif re.search(r"(END +FUNCTION +)([0-9a-z_]+)", line):
-                    name = re.search(r"(END +FUNCTION +)([0-9a-z_]+)", line).group(2)
+                elif re.search(r"(END +FUNCTION +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(END +FUNCTION +)([0-9A-Za-z_]+)", line).group(2).lower()
                     if breadcrumbs and (name == breadcrumbs[-1]):
                         breadcrumbs.pop(-1)
                     else:
                         raise RuntimeError("'END FUNCTION' found without 'FUNCTION': "
                                            "{} in {} #L{}".format(name, fortran_file, lineno))
-                elif re.search(r"(FUNCTION +)([0-9a-z_]+)", line):
-                    name = re.search(r"(FUNCTION +)([0-9a-z_]+)", line).group(2)
+                elif re.search(r"(FUNCTION +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(FUNCTION +)([0-9A-Za-z_]+)", line).group(2).lower()
                     if breadcrumbs:
                         if breadcrumbs[-1] not in memberships:
                             memberships[breadcrumbs[-1]] = []
@@ -196,9 +196,9 @@ def parse_fortran_files(fortran_files, sep_):
 
                 # find use statements
                 elif re.search(
-                        r"(USE +)([0-9a-z_]+)( *, *ONLY *:)([0-9a-z_,+\-*/=><() ]+)", line):
-                    match = re.search(r"(USE +)([0-9a-z_]+)( *, *ONLY *:)([0-9a-z_,+\-*/=><() ]+)", line)
-                    for name in match.group(4).split(','):
+                        r"(USE +)([0-9A-Za-z_]+)( *, *ONLY *:)([0-9A-Za-z_,+\-*/=><() ]+)", line):
+                    match = re.search(r"(USE +)([0-9A-Za-z_]+)( *, *ONLY *:)([0-9A-Za-z_,+\-*/=><() ]+)", line)
+                    for name in match.group(4).lower().split(','):
                         name = name.strip()
                         if name:
                             if sep_.join(breadcrumbs) not in caller_callees:
@@ -206,22 +206,22 @@ def parse_fortran_files(fortran_files, sep_):
                             if '=>' in name:
                                 name1, name2 = name.split('=>')
                                 caller_callees[sep_.join(breadcrumbs)].append(
-                                    sep_.join([match.group(2), name2.strip()])
+                                    sep_.join([match.group(2).lower(), name2.strip()])
                                 )
                                 # store renaming
                                 renaming[name1.strip()] = name2.strip()
                                 # store module name
-                                use_to_call[name1.strip()] = match.group(2)
+                                use_to_call[name1.strip()] = match.group(2).lower()
                             else:
                                 caller_callees[sep_.join(breadcrumbs)].append(
-                                    sep_.join([match.group(2), name])
+                                    sep_.join([match.group(2).lower(), name])
                                 )
                                 # store module name
-                                use_to_call[name] = match.group(2)
+                                use_to_call[name] = match.group(2).lower()
 
                 # find call statements
-                elif re.search(r"(CALL +)([0-9a-z_]+)", line):
-                    name = re.search(r"(CALL +)([0-9a-z_]+)", line).group(2)
+                elif re.search(r"(CALL +)([0-9A-Za-z_]+)", line):
+                    name = re.search(r"(CALL +)([0-9A-Za-z_]+)", line).group(2).lower()
                     # determine belonging of callee
                     if name in use_to_call:
                         # it is within another namespace in another file
