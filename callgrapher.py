@@ -6,6 +6,37 @@ import graphviz as gv
 import argparse
 
 
+_intrinsic_fortran = [
+    'iso_fortran_env',
+    'iso_c_binding',
+    'omp_lib',
+    'omp_lib_kinds',
+    'get_command_argument',
+    'random_number',
+    'random_seed'
+]
+
+_mpi = [
+    'mpi',
+    'mpi_init',
+    'mpi_finalize',
+    'mpi_allreduce',
+    'mpi_bcast',
+    'mpi_scatterv',
+    'mpi_gatherv',
+    'mpi_comm_size',
+    'mpi_comm_rank',
+    'mpi_type_get_extent',
+    'mpi_type_vector',
+    'mpi_type_create_resized',
+    'mpi_type_commit'
+]
+
+_netcdf = [
+    'netcdf'
+]
+
+
 def parse_fortran_files(fortran_files, sep_):
     # parse files
     locations = {}
@@ -454,14 +485,33 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
     return nodes
 
 
-def generate_loc(root_caller, locations, nodes, out_dir):
-    # create a simple text files to know where to find callees
+def generate_list_files(root_caller, locations, nodes, sep_, out_dir):
+    # generate list of files required for compilation
+    list_files = []
+    for node in nodes:
+        if node in locations:
+            if locations[node] not in list_files:
+                list_files.append(locations[node])
+        elif node in _intrinsic_fortran + _mpi + _netcdf:
+            pass
+        else:
+            # it is a variable
+            node_ = sep_.join(node.split(sep_)[:-1])
+            if node_ in locations:
+                if locations[node_] not in list_files:
+                    list_files.append(locations[node_])
+            elif node_ in _intrinsic_fortran + _mpi + _netcdf:
+                pass
+            else:
+                raise KeyError(f"location for node '{node}' not found")
+
+    # eliminate duplicates
+    list_files = list(set(list_files))
+    # create a simple text file listing the source files required
     with open(sep.join([out_dir, '{}.txt'.format(root_caller)]), 'w') as f:
         w = csv.writer(f, delimiter='\t')
-        keys = sorted(list(locations.keys()))
-        for key in keys:
-            if key in nodes:
-                w.writerow([key, locations[key]])
+        for file_ in list_files:
+            w.writerow([file_])
 
 
 if __name__ == '__main__':
@@ -542,4 +592,4 @@ if __name__ == '__main__':
         )
 
         # generate a location helper
-        generate_loc(_root_caller, _locations, _nodes, output_dir)
+        generate_list_files(_root_caller, _locations, _nodes, _sep, output_dir)
