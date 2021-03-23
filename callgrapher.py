@@ -479,7 +479,7 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
     base.render(
         sep.join([out_dir, '{}.gv'.format(root_caller)]),
         format='pdf',
-        view=True
+        view=False
     )
 
     return nodes
