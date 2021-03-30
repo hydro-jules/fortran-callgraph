@@ -16,6 +16,23 @@ _intrinsic_fortran = [
     'random_seed'
 ]
 
+# priorities to give in compilation to avoid missing dependencies
+# (keys are the priorities, optional values are lower-order priorities
+#  that need to be checked because the key name is included in the name
+#  of the value and could trigger a false positive)
+_priorities = {
+    'drhook_dummy': None,
+    'mpi_dummy': None,
+    'netcdf_dummy': None,
+    'params': 'science/params',
+    'util': None,
+    'io': None,
+    'control': None,
+    'initialisation': None,
+    'science/params': None,
+    'science': None
+}
+
 
 def parse_fortran_files(fortran_files, sep_):
     # parse files
@@ -465,7 +482,7 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
     return nodes
 
 
-def generate_list_files(root_caller, locations, nodes, sep_, out_dir):
+def generate_dependency_files(root_caller, locations, nodes, sep_, out_dir):
     # generate list of files required for compilation
     list_files = []
     for node in nodes:
@@ -487,11 +504,34 @@ def generate_list_files(root_caller, locations, nodes, sep_, out_dir):
 
     # eliminate duplicates
     list_files = list(set(list_files))
-    # create a simple text file listing the source files required
+
+    # store files into sub-groups
+    sub_groups = {p: [] for p in _priorities}
+
+    for file_ in list_files:
+        found = False
+        # find priority
+        for p in _priorities:
+            if f"{sep}{p}{sep}" in file_:
+                if not found:
+                    # deal with lower priority sharing same name as current
+                    if _priorities[p] and (f"{sep}{_priorities[p]}{sep}" in file_):
+                        sub_groups[_priorities[p]].append(file_)
+                    else:
+                        sub_groups[p].append(file_)
+                    found = True
+
+        if not found:
+            raise RuntimeError(f"no priority found for {file_}")
+
+    # create a text file listing required source files by order of priority
     with open(sep.join([out_dir, '{}.txt'.format(root_caller)]), 'w') as f:
         w = csv.writer(f, delimiter='\t')
-        for file_ in list_files:
-            w.writerow([file_])
+        for p in _priorities:
+            # arbitrary alphabetical sorting within same level of priority
+            list_files = sorted(sub_groups[p])
+            for file_ in list_files:
+                w.writerow([file_])
 
 
 if __name__ == '__main__':
@@ -576,5 +616,5 @@ if __name__ == '__main__':
             _sep, output_dir, _ignore, _clustering, _without_variables
         )
 
-        # generate a location helper
-        generate_list_files(_root_caller, _locations, _nodes, _sep, output_dir)
+        # create dependencies file
+        generate_dependency_files(_root_caller, _locations, _nodes, _sep, output_dir)
