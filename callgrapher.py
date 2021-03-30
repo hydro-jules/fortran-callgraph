@@ -527,11 +527,12 @@ if __name__ == '__main__':
                              "to use as root to call graph (use double "
                              "underscore to separate module and "
                              "subroutine/function)")
-    parser.add_argument('-s', '--source_dir',
+    parser.add_argument('-s', '--source_dirs',
                         type=str,
-                        help="path to top-level directory containing "
-                             "Fortran files to consider for call graph "
-                             "- default to current working directory",
+                        nargs='+',
+                        help="(list of) path(s) to top-level directory(ies) "
+                             "containing Fortran files to consider for call "
+                             "graph - default to current working directory",
                         default='.')
     parser.add_argument('-e', '--extension',
                         type=str,
@@ -566,7 +567,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     root_callers = args.root_callers
-    source_dir = args.source_dir
+    source_dirs = args.source_dirs
     output_dir = args.output_dir
     extension = args.extension
     _ignore = args.ignore
@@ -575,8 +576,12 @@ if __name__ == '__main__':
 
     # gather all Fortran files found in source directory and its sub-directories
     _sep = '__'
-    _fortran_files = glob(sep.join([source_dir, '/**/*.{}'.format(extension)]),
-                          recursive=True)
+    _fortran_files = []
+    for source_dir in source_dirs:
+        _fortran_files.extend(
+            glob(sep.join([source_dir, '/**/*.{}'.format(extension)]),
+                 recursive=True)
+        )
 
     # parse all source code
     _caller_callees, _memberships, _kinds, _locations = parse_fortran_files(
