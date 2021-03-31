@@ -383,9 +383,8 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                                 other_child = sep_.join([parent, m])
                                 # check whether to ignore callee
                                 if not (ignore and (other_child in ignore)):
-                                    # add if callee is itself a caller
-                                    if other_child in caller_callees:
-                                        next_callers.append(other_child)
+                                    # add child as potential next caller
+                                    next_callers.append(other_child)
                     if (parent, child) not in edges:
                         # add edge for parent-child relationship
                         base.edge(parent, caller, arrowhead='none',
@@ -438,9 +437,8 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                                     other_child = sep_.join([parent, m])
                                     # check whether to ignore callee
                                     if not (ignore and (other_child in ignore)):
-                                        # add if callee is itself a caller
-                                        if other_child in caller_callees:
-                                            next_callers.append(other_child)
+                                        # add child as potential next caller
+                                        next_callers.append(other_child)
                         if (parent, child) not in edges:
                             # add edge for parent-child relationship
                             base.edge(parent, callee, arrowhead='none',
