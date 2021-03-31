@@ -457,12 +457,14 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                     )
                     nodes.append(callee)
 
+                    # store callee as potential next caller
+                    next_callers.append(callee)
+
                 # add edge between caller and callee
                 if (caller, callee) not in edges:
                     base.edge(caller, callee)
                     edges.append((caller, callee))
-                # store callee as potential next caller
-                next_callers.append(callee)
+
         # move on to next caller rank (eliminating duplicates)
         next_callers = list(set(next_callers))
         callers = next_callers
