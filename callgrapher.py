@@ -348,6 +348,7 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
     graphs = {}
     nodes = []
     edges = []
+    ext_caller_callers = {}
 
     while callers:
         next_callers = []
@@ -462,6 +463,9 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                 if (caller, callee) not in edges:
                     base.edge(caller, callee)
                     edges.append((caller, callee))
+                    if caller not in ext_caller_callers:
+                        ext_caller_callers[caller] = []
+                    ext_caller_callers[caller].append(callee)
 
         # move on to next caller rank (eliminating duplicates)
         next_callers = list(set(next_callers))
@@ -479,10 +483,10 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
         view=False
     )
 
-    return nodes
+    return nodes, ext_caller_callers
 
 
-def generate_dependency_files(root_caller, locations, nodes, sep_, out_dir):
+def generate_sources_file(root_caller, locations, nodes, sep_, out_dir):
     # generate list of files required for compilation
     list_files = []
     for node in nodes:
@@ -525,13 +529,52 @@ def generate_dependency_files(root_caller, locations, nodes, sep_, out_dir):
             raise RuntimeError(f"no priority found for {file_}")
 
     # create a text file listing required source files by order of priority
-    with open(sep.join([out_dir, '{}.txt'.format(root_caller)]), 'w') as f:
-        w = csv.writer(f, delimiter='\t')
+    with open(sep.join([out_dir, '{}.sources'.format(root_caller)]), 'w') as f:
         for p in _priorities:
             # arbitrary alphabetical sorting within same level of priority
             list_files = sorted(sub_groups[p])
             for file_ in list_files:
-                w.writerow([file_])
+                f.write(f"{file_}\n")
+
+
+def generate_dependencies_file(root_caller, ext_caller_callees, locations,
+                               sep_, source_dir, build_dir, out_dir):
+    # gather dependencies per target
+    dependencies = {}
+
+    for caller, callees in ext_caller_callees.items():
+        parent = caller.split(sep_)[0]
+        try:
+            target = locations[parent]
+        except KeyError:
+            RuntimeError(f"{parent} has no location")
+
+        requirements = []
+        for callee in callees:
+            child = callee.split(sep_)[0]
+            if child != parent:
+                try:
+                    requirements.append(locations[child])
+                except KeyError:
+                    RuntimeError(f"{child} has no location")
+
+        requirements = list(set(requirements))
+
+        if requirements:
+            if target not in dependencies:
+                dependencies[target] = []
+            dependencies[target].extend(requirements)
+
+    # create a file containing object dependencies for makefile
+    with open(sep.join([out_dir, '{}.dependencies'.format(root_caller)]), 'w') as f:
+        for target, requirements in dependencies.items():
+            requirements = list(set(requirements))
+
+            requirements = ' \\\n'.join(requirements)
+            f.write(
+                f"{target}: \\\n{requirements}\n\n".replace(
+                    '.f90', '.o').replace(source_dir, build_dir)
+            )
 
 
 if __name__ == '__main__':
@@ -553,6 +596,13 @@ if __name__ == '__main__':
                              "consider for call graph - default to current "
                              "working directory",
                         default='.')
+    parser.add_argument('-b', '--build_dir',
+                        type=str,
+                        help="path to directory where object files resulting "
+                             "from compilation of Fortran files are (required "
+                             "for writing the dependency file) - default to "
+                             "source directory",
+                        default=None)
     parser.add_argument('-e', '--extension',
                         type=str,
                         help="file extension for the source code (case-sensitive) "
@@ -585,10 +635,11 @@ if __name__ == '__main__':
     # collect parameters
     args = parser.parse_args()
 
-    root_callers = args.root_callers
-    output_dir = args.output_dir
-    extension = args.extension
+    _root_callers = args.root_callers
     _source_dir = args.source_dir
+    _build_dir = args.build_dir if args.build_dir else _source_dir
+    _output_dir = args.output_dir
+    _extension = args.extension
     _ignore = args.ignore
     _clustering = args.cluster
     _without_variables = args.without_variables
@@ -606,12 +657,19 @@ if __name__ == '__main__':
     )
 
     # for each root caller
-    for _root_caller in root_callers:
+    for _root_caller in _root_callers:
         # generate a call graph
-        _nodes = generate_dot_and_pdf(
+        _nodes, _ext_caller_callees = generate_dot_and_pdf(
             _root_caller, _caller_callees, _memberships, _kinds,
-            _sep, output_dir, _ignore, _clustering, _without_variables
+            _sep, _output_dir, _ignore, _clustering, _without_variables
         )
 
-        # create dependencies file
-        generate_dependency_files(_root_caller, _locations, _nodes, _sep, output_dir)
+        # create sources and dependencies files
+        generate_sources_file(
+            _root_caller, _locations, _nodes, _sep, _output_dir
+        )
+
+        generate_dependencies_file(
+            _root_caller, _ext_caller_callees, _locations, _sep,
+            _source_dir, _build_dir, _output_dir
+        )
