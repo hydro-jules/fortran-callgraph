@@ -7,8 +7,8 @@ python callgrapher.py --help
 ```
 
 ```text
-usage: callgrapher.py [-h] [-s SOURCE_DIR] [-e EXTENSION] [-o OUTPUT_DIR]
-                      [-i IGNORE [IGNORE ...]] [-c]
+usage: callgrapher.py [-h] [-s SOURCE_DIR] [-b BUILD_DIR] [-e EXTENSION]
+                      [-o OUTPUT_DIR] [-i IGNORE [IGNORE ...]] [-c] [-v]
                       root_callers [root_callers ...]
 
 generate call graphs from preprocessed Fortran source code
@@ -21,9 +21,12 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -s SOURCE_DIR, --source_dir SOURCE_DIR
-                        path to top-level directory containing Fortran files
-                        to consider for call graph - default to current
-                        working directory
+                        path to directory containing Fortran files to consider
+                        for call graph - default to current working directory
+  -b BUILD_DIR, --build_dir BUILD_DIR
+                        path to directory where object files resulting from
+                        compilation of Fortran files are (required for writing
+                        the dependency file) - default to source directory
   -e EXTENSION, --extension EXTENSION
                         file extension for the source code (case-sensitive) -
                         default to f90
@@ -36,10 +39,12 @@ optional arguments:
                         module and subroutine/function)
   -c, --cluster         visually gather entities into their containing modules
                         (if any)
+  -v, --without_variables
+                        option to not display the variables
 ```
 
 ### Example
 
 ```bash
-python callgrapher.py 'snow_mod__snow' -s 'jules-vn5.9/src' -i 'logging_mod__write_to_log'
+python callgrapher.py 'snow_mod__snow' -s 'jules-vn6.0/srcpp'
 ```
