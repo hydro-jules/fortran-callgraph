@@ -1,7 +1,6 @@
 from glob import glob
 from os import sep
 import re
-import csv
 import graphviz as gv
 import argparse
 
@@ -366,13 +365,17 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                     if parent not in nodes:
                         # create cluster graph if requested
                         if clustering:
-                            graph = gv.Digraph(
-                                name='_'.join(['cluster', parent]),
-                                **graph_attrs
-                            )
+                            if parent not in graphs:
+                                graph = gv.Digraph(
+                                    name='_'.join(['cluster', parent]),
+                                    **graph_attrs
+                                )
+                                graphs[parent] = graph
+                            else:
+                                graph = graphs[parent]
                         else:
                             graph = base
-                        graphs[parent] = graph
+
                         # add node for parent
                         graph.node(parent, **node_attrs[kinds.get(parent, 'MODULE')])
                         nodes.append(parent)
@@ -386,17 +389,21 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                                 if not (ignore and (other_child in ignore)):
                                     # add child as potential next caller
                                     next_callers.append(other_child)
+                    else:
+                        if parent in graphs:
+                            graph = graphs[parent]
+
                     if (parent, child) not in edges:
                         # add edge for parent-child relationship
-                        base.edge(parent, caller, arrowhead='none',
-                                  arrowtail='diamond')
+                        graph.edge(parent, caller, arrowhead='none',
+                                   arrowtail='diamond')
                         edges.append((parent, child))
                 else:
                     # assign caller to base graph
-                    graphs[caller] = base
+                    graph = base
 
                 # add node for caller
-                graphs[caller.split(sep_)[0]].node(
+                graph.node(
                     name=caller, label=caller.split(sep_)[-1],
                     **node_attrs[kinds.get(caller, 'VARIABLE')]
                 )
@@ -407,6 +414,7 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
             for callee in callees:
                 if ignore and (callee in ignore):
                     continue
+
                 # if callee not already a node, make it one
                 if callee not in nodes:
                     if callee not in kinds:
@@ -420,13 +428,17 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                         if parent not in nodes:
                             # create cluster graph if requested
                             if clustering:
-                                graph = gv.Digraph(
-                                    name='_'.join(['cluster', parent]),
-                                    **graph_attrs
-                                )
+                                if parent not in graphs:
+                                    graph = gv.Digraph(
+                                        name='_'.join(['cluster', parent]),
+                                        **graph_attrs
+                                    )
+                                    graphs[parent] = graph
+                                else:
+                                    graph = graphs[parent]
                             else:
                                 graph = base
-                            graphs[parent] = graph
+
                             # add node for parent
                             graph.node(parent, **node_attrs[kinds.get(parent, 'MODULE')])
                             nodes.append(parent)
@@ -440,17 +452,21 @@ def generate_dot_and_pdf(root_caller, caller_callees, memberships, kinds,
                                     if not (ignore and (other_child in ignore)):
                                         # add child as potential next caller
                                         next_callers.append(other_child)
+                        else:
+                            if parent in graphs:
+                                graph = graphs[parent]
+
                         if (parent, child) not in edges:
                             # add edge for parent-child relationship
-                            base.edge(parent, callee, arrowhead='none',
-                                      arrowtail='diamond')
+                            graph.edge(parent, callee, arrowhead='none',
+                                       arrowtail='diamond')
                             edges.append((parent, child))
                     else:
                         # assign callee to base graph
-                        graphs[callee] = base
+                        graph = base
 
                     # add node for callee
-                    graphs[callee.split(sep_)[0]].node(
+                    graph.node(
                         name=callee, label=callee.split(sep_)[-1],
                         **node_attrs[kinds.get(callee, 'VARIABLE')]
                     )
