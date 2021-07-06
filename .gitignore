@@ -1,2 +1,5 @@
+makefiles/build
+*.so
+
 # macOS specific
 .DS_store
